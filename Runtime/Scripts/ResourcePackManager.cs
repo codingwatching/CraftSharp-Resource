@@ -104,6 +104,46 @@ namespace CraftSharp.Resource
             ItemModelLoader = new ItemModelLoader(this);
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetForPlaySession()
+        {
+            var resources = new HashSet<UnityEngine.Object>();
+
+            if (blankTextureInstance)
+                resources.Add(blankTextureInstance);
+            if (Instance.particleAtlas)
+                resources.Add(Instance.particleAtlas);
+            if (Instance.destroyTextureArray)
+                resources.Add(Instance.destroyTextureArray);
+
+            foreach (var atlas in Instance.atlasArrays)
+                if (atlas)
+                    resources.Add(atlas);
+            foreach (var texture in Instance.EntityTexture2DTable.Values)
+                if (texture)
+                    resources.Add(texture);
+            foreach (var meshes in Instance.ParticleMeshesTable.Values)
+                foreach (var mesh in meshes)
+                    if (mesh)
+                        resources.Add(mesh);
+
+            foreach (var resource in resources)
+            {
+                if (Application.isPlaying)
+                    UnityEngine.Object.Destroy(resource);
+                else
+                    UnityEngine.Object.DestroyImmediate(resource);
+            }
+
+            blankTextureInstance = null;
+            Instance.particleAtlas = null;
+            Instance.atlasArrays[0] = null!;
+            Instance.atlasArrays[1] = null!;
+            Instance.destroyTextureArray = null;
+            Instance.texAtlasTable.Clear();
+            Instance.ClearPacks();
+        }
+
         public void AddPack(ResourcePack pack) => packs.Add(pack);
 
         public void ClearPacks()

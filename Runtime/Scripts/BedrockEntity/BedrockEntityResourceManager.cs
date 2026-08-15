@@ -123,6 +123,28 @@ namespace CraftSharp.Resource.BedrockEntity
             blockEntityModelsPath = PathHelper.GetPackDirectoryNamed("block_entity_models");
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetForPlaySession() => Instance.ClearLoadedResources();
+
+        private void ClearLoadedResources()
+        {
+            foreach (var texture in CachedTextures.Values.Distinct())
+                if (texture)
+                {
+                    if (Application.isPlaying)
+                        UnityEngine.Object.Destroy(texture);
+                    else
+                        UnityEngine.Object.DestroyImmediate(texture);
+                }
+
+            EntityRenderDefinitions.Clear();
+            EntityGeometries.Clear();
+            EntityAnimations.Clear();
+            MaterialRenderTypes.Clear();
+            CachedTextures.Clear();
+            TextureFileTable.Clear();
+        }
+
         private string GetFullTexturePath(string pathWithoutExtension)
         {
             // First check JE texture table
@@ -313,12 +335,7 @@ namespace CraftSharp.Resource.BedrockEntity
         public IEnumerator LoadEntityResources(DataLoadFlag flag, Action<string> updateStatus)
         {
             // Clean up
-            EntityRenderDefinitions.Clear();
-            EntityGeometries.Clear();
-            EntityAnimations.Clear();
-            MaterialRenderTypes.Clear();
-            CachedTextures.Clear();
-            TextureFileTable.Clear();
+            ClearLoadedResources();
 
             // Load animations
             var animFolderDir = new DirectoryInfo($"{resourcePath}{SP}animations");

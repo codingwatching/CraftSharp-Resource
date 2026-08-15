@@ -22,6 +22,9 @@ namespace CraftSharp.Resource
         // Cached generated models (layerCount, precision, thickness, useItemColor) => model
         private static readonly Dictionary<int4, List<JsonModelElement>> generatedModels = new();
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetForPlaySession() => generatedModels.Clear();
+
         public static List<JsonModelElement> GetGeneratedItemModelElements(int layerCount, int precision, int thickness, bool useItemColor)
         {
             int4 modelKey = new(layerCount, precision, thickness, useItemColor ? 1 : 0);
