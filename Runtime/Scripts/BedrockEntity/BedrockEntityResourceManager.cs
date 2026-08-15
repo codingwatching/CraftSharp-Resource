@@ -110,18 +110,13 @@ namespace CraftSharp.Resource.BedrockEntity
             }
         };
         
-        private readonly string resourcePath;
-        private readonly string playerModelsPath;
-        private readonly string blockEntityModelsPath;
+        private static string ResourcePath => PathHelper.GetPackDirectoryNamed("bedrock_res");
+        private static string PlayerModelsPath => PathHelper.GetPackDirectoryNamed("player_models");
+        private static string BlockEntityModelsPath => PathHelper.GetPackDirectoryNamed("block_entity_models");
         
         public static readonly BedrockEntityResourceManager Instance = new();
 
-        private BedrockEntityResourceManager()
-        {
-            resourcePath = PathHelper.GetPackDirectoryNamed("bedrock_res");
-            playerModelsPath = PathHelper.GetPackDirectoryNamed("player_models");
-            blockEntityModelsPath = PathHelper.GetPackDirectoryNamed("block_entity_models");
-        }
+        private BedrockEntityResourceManager() { }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetForPlaySession() => Instance.ClearLoadedResources();
@@ -162,11 +157,11 @@ namespace CraftSharp.Resource.BedrockEntity
             }
             
             // BE texture could be either tga or png
-            if (File.Exists($"{resourcePath}{SP}{pathWithoutExtension}.png"))
+            if (File.Exists($"{ResourcePath}{SP}{pathWithoutExtension}.png"))
             {
-                return $"{resourcePath}{SP}{pathWithoutExtension}.png";
+                return $"{ResourcePath}{SP}{pathWithoutExtension}.png";
             }
-            return File.Exists($"{resourcePath}{SP}{pathWithoutExtension}.tga") ? $"{resourcePath}{SP}{pathWithoutExtension}.tga" : $"{resourcePath}{SP}{pathWithoutExtension}";
+            return File.Exists($"{ResourcePath}{SP}{pathWithoutExtension}.tga") ? $"{ResourcePath}{SP}{pathWithoutExtension}.tga" : $"{ResourcePath}{SP}{pathWithoutExtension}";
         }
         
         private static bool CheckShouldReplaceEntry(BedrockVersion prevVer, BedrockVersion newVer)
@@ -337,6 +332,9 @@ namespace CraftSharp.Resource.BedrockEntity
             // Clean up
             ClearLoadedResources();
 
+            var resourcePath = ResourcePath;
+            Debug.Log($"Current BE res path: {resourcePath}");
+
             // Load animations
             var animFolderDir = new DirectoryInfo($"{resourcePath}{SP}animations");
             foreach (var animFile in animFolderDir.GetFiles("*.json", SearchOption.AllDirectories)) // Allow sub folders...
@@ -351,8 +349,8 @@ namespace CraftSharp.Resource.BedrockEntity
                 }
             }
 
-            LoadExtraEntityModelFolder(playerModelsPath, "player");
-            LoadExtraEntityModelFolder(blockEntityModelsPath, "block_entity");
+            LoadExtraEntityModelFolder(PlayerModelsPath, "player");
+            LoadExtraEntityModelFolder(BlockEntityModelsPath, "block_entity");
             
             yield return null;
 
